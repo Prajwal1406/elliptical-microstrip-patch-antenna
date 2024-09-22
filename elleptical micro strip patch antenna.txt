@@ -1,0 +1,152 @@
+% Define parameters
+plotFrequency = 2500000000;
+freqRange = (2205:25.0:2695) * 1e6;
+LGp = 100e-3;
+WGp = 100e-3;
+h = 6.6e-3;
+a = 33.5e-3;
+b = 18.8e-3;
+f = 11.6e-3;
+d = dielectric('EpsilonR', 4.2, 'LossTangent', 0.02);
+d1 = dielectric('EpsilonR', 4.4, 'LossTangent', 0.02);
+d2 = dielectric('EpsilonR', 4.6, 'LossTangent', 0.02);
+d3 = dielectric('EpsilonR', 4.8, 'LossTangent', 0.02);
+
+% Create patch antennas
+EPA = patchMicrostripElliptical('MajorAxis', a, 'MinorAxis', b, 'Height', h, 'Substrate', d, 'GroundPlaneLength', LGp, 'GroundPlaneWidth', WGp, 'FeedOffset', [-(a/2-f) 0]);
+EPA1 = patchMicrostripElliptical('MajorAxis', a, 'MinorAxis', b, 'Height', h, 'Substrate', d1, 'GroundPlaneLength', LGp, 'GroundPlaneWidth', WGp, 'FeedOffset', [-(a/2-f) 0]);
+EPA2 = patchMicrostripElliptical('MajorAxis', a, 'MinorAxis', b, 'Height', h, 'Substrate', d2, 'GroundPlaneLength', LGp, 'GroundPlaneWidth', WGp, 'FeedOffset', [-(a/2-f) 0]);
+EPA3 = patchMicrostripElliptical('MajorAxis', a, 'MinorAxis', b, 'Height', h, 'Substrate', d3, 'GroundPlaneLength', LGp, 'GroundPlaneWidth', WGp, 'FeedOffset', [-(a/2-f) 0]);
+
+% Calculate S-parameters
+s = sparameters(EPA, freqRange);
+s1 = sparameters(EPA1, freqRange);
+s2 = sparameters(EPA2, freqRange);
+s3 = sparameters(EPA3, freqRange);
+
+% Calculate VSWR
+z0 = 50;
+vswr1 = vswr(EPA, freqRange, z0);
+vswr2 = vswr(EPA1, freqRange, z0);
+vswr3 = vswr(EPA2, freqRange, z0);
+vswr4 = vswr(EPA3, freqRange, z0);
+
+% Create figure with subplots
+figure;
+
+% Subplot for S-parameters
+subplot(2, 1, 1);
+hold on;
+rfplot(s, 'k');
+rfplot(s1, 'b');
+rfplot(s2, 'g');
+rfplot(s3, 'r');
+title('S PARAMETERS');
+legend('4.2 FR4 Substrate', '4.4 FR4 Substrate', '4.6 FR4 Substrate', '4.8 FR4 Substrate');
+hold off;
+
+% Subplot for VSWR
+subplot(2, 1, 2);
+hold on;
+plot(freqRange/1e9, vswr1, 'k');
+plot(freqRange/1e9, vswr2, 'b');
+plot(freqRange/1e9, vswr3, 'g');
+plot(freqRange/1e9, vswr4, 'r');
+title('VSWR');
+xlabel('Frequency (GHz)');
+ylabel('Magnitude');
+legend('4.2 FR4 Substrate', '4.4 FR4 Substrate', '4.6 FR4 Substrate', '4.8 FR4 Substrate');
+hold off;
+
+%%2d pattern part
+figure;
+pattern(EPA, plotFrequency, 0, 0:1:360);
+title('Radiation Pattern - 4.2 FR4 Substrate');
+
+figure;
+pattern(EPA1, plotFrequency, 0, 0:1:360);
+title('Radiation Pattern - 4.4 FR4 Substrate');
+
+figure;
+pattern(EPA2, plotFrequency, 0, 0:1:360);
+title('Radiation Pattern - 4.6 FR4 Substrate');
+
+figure;
+pattern(EPA3, plotFrequency, 0, 0:1:360);
+title('Radiation Pattern - 4.8 FR4 Substrate');
+
+%%azimuth part
+figure;
+patternAzimuth(EPA, plotFrequency, 0, 'Azimuth', -180:1:180);
+title('Azimuth Radiation Pattern - 4.2 FR4 Substrate');
+
+figure;
+patternAzimuth(EPA1, plotFrequency, 0, 'Azimuth', -180:1:180);
+title('Azimuth Radiation Pattern - 4.4 FR4 Substrate');
+
+figure;
+patternAzimuth(EPA2, plotFrequency, 0, 'Azimuth', -180:1:180);
+title('Azimuth Radiation Pattern - 4.6 FR4 Substrate');
+
+figure;
+patternAzimuth(EPA3, plotFrequency, 0, 'Azimuth', -180:1:180);
+title('Azimuth Radiation Pattern - 4.8 FR4 Substrate');
+
+%%3d pattern subplot part
+
+figure;
+pattern(EPA, plotFrequency);
+title('3D Gain Pattern - 4.2 FR4 Substrate');
+
+figure;
+pattern(EPA1, plotFrequency);
+title('3D Gain Pattern - 4.4 FR4 Substrate');
+
+figure;
+pattern(EPA2, plotFrequency);
+title('3D Gain Pattern - 4.6 FR4 Substrate');
+
+figure;
+pattern(EPA3, plotFrequency);
+title('3D Gain Pattern - 4.8 FR4 Substrate');
+
+% Calculate impedances
+impedanceEPA = impedance(EPA, freqRange);
+impedanceEPA1 = impedance(EPA1, freqRange);
+impedanceEPA2 = impedance(EPA2, freqRange);
+impedanceEPA3 = impedance(EPA3, freqRange);
+
+% Create figure for impedance plots
+figure;
+
+% Subplot 1
+subplot(2, 2, 1);
+plot(freqRange/1e9, real(impedanceEPA), 'b', freqRange/1e9, imag(impedanceEPA), 'r');
+title('Impedance - 4.2 FR4 Substrate');
+xlabel('Frequency (GHz)');
+ylabel('Impedance (Ohms)');
+legend('Real', 'Imaginary');
+
+% Subplot 2
+subplot(2, 2, 2);
+plot(freqRange/1e9, real(impedanceEPA1), 'b', freqRange/1e9, imag(impedanceEPA1), 'r');
+title('Impedance - 4.4 FR4 Substrate');
+xlabel('Frequency (GHz)');
+ylabel('Impedance (Ohms)');
+legend('Real', 'Imaginary');
+
+% Subplot 3
+subplot(2, 2, 3);
+plot(freqRange/1e9, real(impedanceEPA2), 'b', freqRange/1e9, imag(impedanceEPA2), 'r');
+title('Impedance - 4.6 FR4 Substrate');
+xlabel('Frequency (GHz)');
+ylabel('Impedance (Ohms)');
+legend('Real', 'Imaginary');
+
+% Subplot 4
+subplot(2, 2, 4);
+plot(freqRange/1e9, real(impedanceEPA3), 'b', freqRange/1e9, imag(impedanceEPA3), 'r');
+title('Impedance - 4.8 FR4 Substrate');
+xlabel('Frequency (GHz)');
+ylabel('Impedance (Ohms)');
+legend('Real', 'Imaginary');
